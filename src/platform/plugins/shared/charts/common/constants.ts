@@ -11,6 +11,9 @@ import type { KbnPaletteId } from '@kbn/palettes';
 
 type SystemPaletteId = KbnPaletteId | 'kibana_palette' | 'custom' | 'negative' | 'positive';
 
+export const BRAND_PALETTE_SETTING = 'visualization:brandPalette';
+export const BRAND_LOGO_SETTING = 'visualization:brandLogo';
+
 // Currently supported palettes. This list might be extended dynamically in a later release
 export const paletteIds: SystemPaletteId[] = [
   'default',

@@ -17,6 +17,7 @@
     "@kbn/data-plugin",
     "@kbn/core-lifecycle-browser-mocks",
     "@kbn/palettes",
+    "@kbn/config-schema",
   ],
   "exclude": [
     "target/**/*",

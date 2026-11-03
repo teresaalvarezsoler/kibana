@@ -9,7 +9,8 @@
 
 import type { Plugin, CoreSetup } from '@kbn/core/public';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
-import { palette, systemPalette } from '../common';
+import { setBrandColors } from '@kbn/palettes';
+import { palette, systemPalette, BRAND_PALETTE_SETTING } from '../common';
 
 import { ThemeService } from './services';
 import { PaletteService } from './services/palettes/service';
@@ -41,6 +42,8 @@ export class ChartsPlugin implements Plugin<ChartsPluginSetup, ChartsPluginStart
   public setup(core: CoreSetup, dependencies: SetupDependencies): ChartsPluginSetup {
     dependencies.expressions.registerFunction(palette);
     dependencies.expressions.registerFunction(systemPalette);
+    // Must run before any palette is built so every consumer picks up the brand colors.
+    setBrandColors(core.settings.globalClient.get<string[]>(BRAND_PALETTE_SETTING, []));
     this.themeService.init(core.theme);
     this.palettes = this.paletteService.setup(core.theme.theme$);
     this.activeCursor.setup();

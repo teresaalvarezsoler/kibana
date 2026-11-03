@@ -10,6 +10,7 @@
 import type { CoreSetup, Plugin } from '@kbn/core/server';
 import type { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { palette, systemPalette } from '../common';
+import { getUiSettings } from './ui_settings';
 
 interface SetupDependencies {
   expressions: ExpressionsServerSetup;
@@ -19,6 +20,7 @@ export class ChartsServerPlugin implements Plugin<object, object> {
   public setup(core: CoreSetup, dependencies: SetupDependencies) {
     dependencies.expressions.registerFunction(palette);
     dependencies.expressions.registerFunction(systemPalette);
+    core.uiSettings.registerGlobal(getUiSettings());
 
     return {};
   }

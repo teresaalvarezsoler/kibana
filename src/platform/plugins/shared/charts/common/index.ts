@@ -15,7 +15,12 @@ export type {
 } from './expressions/palette';
 export { palette, systemPalette } from './expressions/palette';
 
-export { paletteIds, defaultCustomColors } from './constants';
+export {
+  paletteIds,
+  defaultCustomColors,
+  BRAND_PALETTE_SETTING,
+  BRAND_LOGO_SETTING,
+} from './constants';
 export type {
   AllowedChartOverrides,
   AllowedSettingsOverrides,

@@ -8,6 +8,8 @@
  */
 
 import { KbnPalettes } from '../classes/palettes';
+import type { IKbnPalette } from '../classes/types';
+import { createBrandPalettes, getBrandColors } from './brand';
 import {
   elasticPalette,
   elasticLineOptimizedPalette,
@@ -28,51 +30,59 @@ import {
 } from './gradient';
 export { logLevelPalette } from './semantic';
 
-const darkKbnPalettes = new KbnPalettes(
-  [
-    elasticPalette,
-    elasticLineOptimizedPalette,
-    severityPalette,
-    kibana7Palette,
-    kibana4Palette,
-    getNeutralPalette(true),
-    complementaryPalette,
-    coolPalette,
-    grayPalette,
-    greenPalette,
-    redPalette,
-    statusPalette,
-    temperaturePalette,
-    warmPalette,
-    elasticClassicPalette,
-    compareToPalette,
-  ],
-  elasticPalette
-);
+const buildKbnPalettes = (
+  darkMode: boolean,
+  defaultPalette: IKbnPalette,
+  lineOptimizedPalette: IKbnPalette
+) =>
+  new KbnPalettes(
+    [
+      defaultPalette,
+      lineOptimizedPalette,
+      severityPalette,
+      kibana7Palette,
+      kibana4Palette,
+      getNeutralPalette(darkMode),
+      complementaryPalette,
+      coolPalette,
+      grayPalette,
+      greenPalette,
+      redPalette,
+      statusPalette,
+      temperaturePalette,
+      warmPalette,
+      elasticClassicPalette,
+      compareToPalette,
+    ],
+    defaultPalette
+  );
 
-const lightKbnPalettes = new KbnPalettes(
-  [
-    elasticPalette,
-    elasticLineOptimizedPalette,
-    severityPalette,
-    kibana7Palette,
-    kibana4Palette,
-    getNeutralPalette(false),
-    complementaryPalette,
-    coolPalette,
-    grayPalette,
-    greenPalette,
-    redPalette,
-    statusPalette,
-    temperaturePalette,
-    warmPalette,
-    elasticClassicPalette,
-    compareToPalette,
-  ],
-  elasticPalette
-);
+const darkKbnPalettes = buildKbnPalettes(true, elasticPalette, elasticLineOptimizedPalette);
+const lightKbnPalettes = buildKbnPalettes(false, elasticPalette, elasticLineOptimizedPalette);
 
-export const getPalettes = (darkMode: boolean) => (darkMode ? darkKbnPalettes : lightKbnPalettes);
+const brandedKbnPalettesCache = new Map<string, KbnPalettes>();
 
+const getBrandedKbnPalettes = (darkMode: boolean, brandColors: readonly string[]) => {
+  const cacheKey = `${darkMode}:${brandColors.join(',')}`;
+  const cached = brandedKbnPalettesCache.get(cacheKey);
+  if (cached) return cached;
+
+  const { brandPalette, brandLineOptimizedPalette } = createBrandPalettes(brandColors, {
+    defaultPalette: elasticPalette,
+    lineOptimizedPalette: elasticLineOptimizedPalette,
+  });
+  const brandedKbnPalettes = buildKbnPalettes(darkMode, brandPalette, brandLineOptimizedPalette);
+  brandedKbnPalettesCache.set(cacheKey, brandedKbnPalettes);
+  return brandedKbnPalettes;
+};
+
+export const getPalettes = (darkMode: boolean) => {
+  const brandColors = getBrandColors();
+  if (brandColors) return getBrandedKbnPalettes(darkMode, brandColors);
+
+  return darkMode ? darkKbnPalettes : lightKbnPalettes;
+};
+
+export { setBrandColors, getBrandColors } from './brand';
 export { elasticPalette, elasticLineOptimizedPalette } from './categorical';
 export * from './get_kbn_palettes';
