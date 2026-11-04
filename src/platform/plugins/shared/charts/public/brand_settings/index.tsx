@@ -18,7 +18,7 @@ const LazyBrandSettingsSection = lazy(() =>
   }))
 );
 
-const SEARCH_TERMS = ['brand', 'palette', 'colors', 'logo'];
+const SEARCH_TERMS = ['custom colors for dashboards', 'brand', 'palette', 'logo'];
 
 /**
  * Adds the Brand section to the global settings page.

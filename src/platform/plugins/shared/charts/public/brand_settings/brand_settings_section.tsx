@@ -231,7 +231,11 @@ export const BrandSettingsSection = ({
   return (
     <EuiPanel hasBorder paddingSize="l" data-test-subj="brandSettingsSection">
       <EuiTitle size="s">
-        <h2>{i18n.translate('charts.brandSettings.title', { defaultMessage: 'Brand' })}</h2>
+        <h2>
+          {i18n.translate('charts.brandSettings.title', {
+            defaultMessage: 'Custom colors for dashboards',
+          })}
+        </h2>
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiText size="s" color="subdued">
@@ -243,6 +247,65 @@ export const BrandSettingsSection = ({
         </p>
       </EuiText>
       <EuiSpacer size="l" />
+
+      <EuiDescribedFormGroup
+        fullWidth
+        title={
+          <h4>
+            {i18n.translate('charts.brandSettings.logoTitle', { defaultMessage: 'Brand logo' })}
+          </h4>
+        }
+        description={i18n.translate('charts.brandSettings.logoDescription', {
+          defaultMessage:
+            'Shown in a banner at the top of dashboards and available to custom panels. Use an SVG image smaller than {maxSize} KB, ideally with a transparent background.',
+          values: { maxSize: MAX_BRAND_LOGO_SIZE_IN_KB },
+        })}
+      >
+        <EuiFormRow fullWidth isInvalid={Boolean(logoError)} error={logoError}>
+          <>
+            {draft.logo && (
+              <>
+                <EuiImage
+                  src={draft.logo}
+                  alt={i18n.translate('charts.brandSettings.logoAlt', {
+                    defaultMessage: 'Brand logo',
+                  })}
+                  size="m"
+                />
+                <EuiSpacer size="s" />
+              </>
+            )}
+            <EuiFilePicker
+              accept={supportedLogoTypes.join(',')}
+              display="default"
+              disabled={disabled}
+              onChange={onLogoChange}
+              initialPromptText={
+                draft.logo
+                  ? i18n.translate('charts.brandSettings.replaceLogo', {
+                      defaultMessage: 'Select or drag a new logo',
+                    })
+                  : i18n.translate('charts.brandSettings.uploadLogo', {
+                      defaultMessage: 'Select or drag your logo',
+                    })
+              }
+            />
+            {draft.logo && (
+              <EuiButtonEmpty
+                size="xs"
+                color="danger"
+                iconType="trash"
+                disabled={disabled}
+                onClick={() => update({ logo: null })}
+              >
+                {i18n.translate('charts.brandSettings.removeLogo', {
+                  defaultMessage: 'Remove logo',
+                })}
+              </EuiButtonEmpty>
+            )}
+          </>
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
 
       <EuiDescribedFormGroup
         fullWidth
@@ -306,65 +369,6 @@ export const BrandSettingsSection = ({
           />
         </>
       )}
-
-      <EuiDescribedFormGroup
-        fullWidth
-        title={
-          <h4>
-            {i18n.translate('charts.brandSettings.logoTitle', { defaultMessage: 'Brand logo' })}
-          </h4>
-        }
-        description={i18n.translate('charts.brandSettings.logoDescription', {
-          defaultMessage:
-            'Shown in a banner at the top of dashboards and available to custom panels. Use an SVG image smaller than {maxSize} KB, ideally with a transparent background.',
-          values: { maxSize: MAX_BRAND_LOGO_SIZE_IN_KB },
-        })}
-      >
-        <EuiFormRow fullWidth isInvalid={Boolean(logoError)} error={logoError}>
-          <>
-            {draft.logo && (
-              <>
-                <EuiImage
-                  src={draft.logo}
-                  alt={i18n.translate('charts.brandSettings.logoAlt', {
-                    defaultMessage: 'Brand logo',
-                  })}
-                  size="m"
-                />
-                <EuiSpacer size="s" />
-              </>
-            )}
-            <EuiFilePicker
-              accept={supportedLogoTypes.join(',')}
-              display="default"
-              disabled={disabled}
-              onChange={onLogoChange}
-              initialPromptText={
-                draft.logo
-                  ? i18n.translate('charts.brandSettings.replaceLogo', {
-                      defaultMessage: 'Select or drag a new logo',
-                    })
-                  : i18n.translate('charts.brandSettings.uploadLogo', {
-                      defaultMessage: 'Select or drag your logo',
-                    })
-              }
-            />
-            {draft.logo && (
-              <EuiButtonEmpty
-                size="xs"
-                color="danger"
-                iconType="trash"
-                disabled={disabled}
-                onClick={() => update({ logo: null })}
-              >
-                {i18n.translate('charts.brandSettings.removeLogo', {
-                  defaultMessage: 'Remove logo',
-                })}
-              </EuiButtonEmpty>
-            )}
-          </>
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
 
       <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
