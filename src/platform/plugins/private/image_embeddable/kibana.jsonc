@@ -21,7 +21,7 @@
       "security",
       "screenshotMode",
     ],
-    "requiredBundles": [],
+    "requiredBundles": ["charts"],
     "extraPublicDirs": ["common"]
   }
 }

@@ -33,6 +33,8 @@ Make all changes in a single ${dashboardTools.generateDashboard} call whenever p
 
 For a new dashboard, set both \`title\` and \`description\`.
 
+When the organization has a brand logo, new dashboards automatically get a full-width brand logo banner (a \`brand_logo\` panel) pinned to the top. Do not add a logo panel of your own, and do not remove the banner unless the user asks.
+
 For an existing dashboard:
 - Edit a panel by its id with \`content\` of the same kind rather than removing and re-adding it. Reorganizing or enhancing a dashboard does not require replacing panels. Edits work for ES|QL Lens, Vega, and custom content panels (\`source: "request"\` with the panel's \`renderer\`), and for markdown and ML anomaly panels (\`source: "config"\` with the panel's \`type\`).
 - For focused edits, pass only the requested change in the \`query\` (e.g. "make the error series blue"). The chart author preserves unrelated presentation settings.

@@ -19,8 +19,14 @@ export {
   paletteIds,
   defaultCustomColors,
   BRAND_PALETTE_SETTING,
+  BRAND_CATEGORICAL_PALETTE_SETTING,
+  BRAND_LINE_OPTIMIZED_PALETTE_SETTING,
   BRAND_LOGO_SETTING,
+  MAX_BRAND_COLORS,
+  MAX_BRAND_PALETTE_COLORS,
+  MAX_BRAND_LOGO_SIZE_IN_KB,
 } from './constants';
+export { resolveBrandPalettes, type BrandPaletteSettings } from './brand';
 export type {
   AllowedChartOverrides,
   AllowedSettingsOverrides,

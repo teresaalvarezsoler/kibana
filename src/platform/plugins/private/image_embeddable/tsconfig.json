@@ -25,6 +25,7 @@
     "@kbn/presentation-util",
     "@kbn/content-management-utils",
     "@kbn/zod",
+    "@kbn/charts-plugin",
     "@kbn/scout",
   ],
   "exclude": ["target/**/*"]

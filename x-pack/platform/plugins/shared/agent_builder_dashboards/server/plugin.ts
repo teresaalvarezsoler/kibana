@@ -11,8 +11,10 @@ import type {
   Plugin,
   PluginInitializerContext,
   Logger,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
+import { BRAND_LOGO_SETTING } from '@kbn/charts-plugin/common';
 import type {
   AgentBuilderDashboardsSetupDependencies,
   AgentBuilderDashboardsStartDependencies,
@@ -68,7 +70,15 @@ export class AgentBuilderDashboardsPlugin
     );
     setupDeps.agentBuilderSml.registerType(createDashboardSmlType({ getDashboardClient }));
 
-    registerSkills(setupDeps.agentBuilder, { getDashboardValidator });
+    const hasBrandLogo = async (savedObjectsClient: SavedObjectsClientContract) => {
+      const [coreStart] = await coreSetup.getStartServices();
+      const logo = await coreStart.uiSettings
+        .globalAsScopedToClient(savedObjectsClient)
+        .get<string | null>(BRAND_LOGO_SETTING);
+      return Boolean(logo);
+    };
+
+    registerSkills(setupDeps.agentBuilder, { getDashboardValidator, hasBrandLogo });
 
     return {};
   }

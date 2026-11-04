@@ -21,7 +21,12 @@ import {
   ADD_PANEL_TRIGGER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
-import { ADD_IMAGE_EMBEDDABLE_ACTION_ID, IMAGE_EMBEDDABLE_TYPE } from '../common/constants';
+import {
+  ADD_BRAND_LOGO_EMBEDDABLE_ACTION_ID,
+  ADD_IMAGE_EMBEDDABLE_ACTION_ID,
+  BRAND_LOGO_EMBEDDABLE_TYPE,
+  IMAGE_EMBEDDABLE_TYPE,
+} from '../common/constants';
 
 export interface ImageEmbeddableSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -67,6 +72,13 @@ export class ImageEmbeddablePlugin
       ]);
       return getImageEmbeddableFactory();
     });
+    plugins.embeddable.registerEmbeddablePublicDefinition(BRAND_LOGO_EMBEDDABLE_TYPE, async () => {
+      const [_, { getBrandLogoEmbeddableFactory }] = await Promise.all([
+        untilPluginStartServicesReady(),
+        import('./brand_logo/get_brand_logo_embeddable_factory'),
+      ]);
+      return getBrandLogoEmbeddableFactory();
+    });
     plugins.embeddable.registerLegacyURLTransform(
       IMAGE_EMBEDDABLE_TYPE,
       async (transformDrilldownsOut) => {
@@ -91,6 +103,15 @@ export class ImageEmbeddablePlugin
       );
 
       plugins.uiActions.attachAction(ADD_CANVAS_ELEMENT_TRIGGER, ADD_IMAGE_EMBEDDABLE_ACTION_ID);
+
+      plugins.uiActions.addTriggerActionAsync(
+        ADD_PANEL_TRIGGER,
+        ADD_BRAND_LOGO_EMBEDDABLE_ACTION_ID,
+        async () => {
+          const { createBrandLogoAction } = await import('./actions/create_brand_logo_action');
+          return createBrandLogoAction;
+        }
+      );
     });
 
     return {};

@@ -8,6 +8,7 @@
  */
 
 export type { ImageConfig, ImageConfigState, ImageEmbeddableState } from './schemas';
+export type { BrandLogoEmbeddableState } from './brand_logo_schema';
 
 export const plugin = async () => {
   const { ImageEmbeddablePlugin } = await import('./plugin');

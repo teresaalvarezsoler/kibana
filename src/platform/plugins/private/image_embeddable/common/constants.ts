@@ -13,3 +13,9 @@ export const IMAGE_EMBEDDABLE_TYPE = 'image';
 export const ADD_IMAGE_EMBEDDABLE_ACTION_ID = 'create_image_embeddable';
 export const IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS = [ON_CLICK_IMAGE, ON_OPEN_PANEL_MENU];
 export const DEFAULT_OBJECT_FIT = 'contain'; // CSS spec defaults to fill but embeddable has historically defaulted to contain
+
+export const BRAND_LOGO_EMBEDDABLE_TYPE = 'brand_logo';
+export const ADD_BRAND_LOGO_EMBEDDABLE_ACTION_ID = 'create_brand_logo_embeddable';
+// Full width and short, so the logo reads as a banner above the other panels.
+export const BRAND_LOGO_PANEL_WIDTH = 48;
+export const BRAND_LOGO_PANEL_HEIGHT = 5;

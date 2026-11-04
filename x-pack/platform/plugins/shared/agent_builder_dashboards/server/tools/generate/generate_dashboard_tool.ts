@@ -6,6 +6,7 @@
  */
 
 import { isEqual } from 'lodash';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -38,6 +39,12 @@ import { createEsqlControlColumnTypeResolver } from './resolvers/esql_control_co
 import { createLayoutArranger } from './layout_arranger';
 import { createPanelResolver } from './resolvers/panel_resolver';
 import { applyDefaultDashboardTimeRange } from './time_range';
+import {
+  addBrandLogoBanner,
+  createBrandLogoBanner,
+  findBrandLogoBanner,
+  removeBrandLogoBanner,
+} from './brand_logo_banner';
 
 const newDashboardMetadataErrorMessage = 'New dashboards require a non-empty `title`.';
 
@@ -132,6 +139,8 @@ const summarizeDashboard = (
 
 export interface GenerateDashboardToolDeps {
   getDashboardValidator: () => Promise<DashboardValidator>;
+  /** Whether the organization configured a brand logo, shown in a banner on new dashboards. */
+  hasBrandLogo?: (savedObjectsClient: SavedObjectsClientContract) => Promise<boolean>;
 }
 
 /**
@@ -148,6 +157,7 @@ export interface GenerateDashboardToolDeps {
  */
 export const generateDashboardTool = ({
   getDashboardValidator,
+  hasBrandLogo,
 }: GenerateDashboardToolDeps): BuiltinSkillBoundedTool<typeof generateDashboardSchema> => {
   return {
     id: dashboardTools.generateDashboard,
@@ -167,7 +177,7 @@ Changes are applied one by one: failed ones are listed in \`failures\` with the 
     schema: generateDashboardSchema,
     handler: async (
       { dashboardId: previousAttachmentId, layout, ...upsert },
-      { logger, attachments, events, esClient, modelProvider }
+      { logger, attachments, events, esClient, modelProvider, savedObjectsClient }
     ) => {
       try {
         const latestVersion = retrieveLatestVersion(attachments, previousAttachmentId);
@@ -206,11 +216,21 @@ Changes are applied one by one: failed ones are listed in \`failures\` with the 
           validator: await getDashboardValidator(),
         });
 
+        // The brand logo banner is kept out of the layout step and pinned to the top afterwards.
+        const brandLogoBanner =
+          findBrandLogoBanner(validatedDashboardData.panels) ??
+          (isNewDashboard && (await hasBrandLogo?.(savedObjectsClient))
+            ? createBrandLogoBanner()
+            : undefined);
+
         // The arranger checks its own output and writes only grids, so the result is not validated again.
-        const { dashboardData: generatedDashboardData, failure: layoutFailure } =
+        const { dashboardData: arrangedDashboardData, failure: layoutFailure } =
           await arrangeDashboardLayout({
-            originalPanels: latestVersion?.data.panels ?? [],
-            dashboardData: validatedDashboardData,
+            originalPanels: removeBrandLogoBanner(latestVersion?.data.panels ?? []),
+            dashboardData: {
+              ...validatedDashboardData,
+              panels: removeBrandLogoBanner(validatedDashboardData.panels),
+            },
             instructions: layout,
             arrangeLayout: createLayoutArranger({ modelProvider }),
             logger,
@@ -218,6 +238,9 @@ Changes are applied one by one: failed ones are listed in \`failures\` with the 
         if (layoutFailure) {
           failures.push(layoutFailure);
         }
+        const generatedDashboardData = brandLogoBanner
+          ? addBrandLogoBanner(arrangedDashboardData, brandLogoBanner)
+          : arrangedDashboardData;
 
         const toDashboardResult = (
           dashboardData: DashboardAttachmentData,
@@ -253,7 +276,7 @@ Changes are applied one by one: failed ones are listed in \`failures\` with the 
         // persisted; the failures reach the agent through the tool result. Controls the agent
         // added on its own are left out without a failure, so the failures can be empty.
         const requestedContent = (upsert.panels?.length ?? 0) + (upsert.controls?.length ?? 0) > 0;
-        if (isNewDashboard && requestedContent && isEmptyDashboard(generatedDashboardData)) {
+        if (isNewDashboard && requestedContent && isEmptyDashboard(arrangedDashboardData)) {
           logger.info('Dashboard was not created because none of the changes were applied');
           return {
             results: [

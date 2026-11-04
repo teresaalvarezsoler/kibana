@@ -8,6 +8,8 @@
     "@kbn/data-source",
     "@kbn/agent-builder-elastic-ai-index-ki-types",
     "@kbn/core",
+    "@kbn/charts-plugin",
+    "@kbn/image-embeddable-plugin",
     "@kbn/i18n",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",

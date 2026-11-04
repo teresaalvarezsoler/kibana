@@ -8,10 +8,11 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import { IMAGE_EMBEDDABLE_TYPE } from '../common/constants';
+import { BRAND_LOGO_EMBEDDABLE_TYPE, IMAGE_EMBEDDABLE_TYPE } from '../common/constants';
 import { getTransforms } from '../common/transforms';
 import type { SetupDeps, StartDeps } from './types';
 import { getImageEmbeddableSchema } from './schemas';
+import { brandLogoEmbeddableSchema } from './brand_logo_schema';
 
 export class ImageEmbeddablePlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
@@ -19,6 +20,10 @@ export class ImageEmbeddablePlugin implements Plugin<void, void, SetupDeps, Star
       title: 'Image',
       getTransforms,
       getSchema: (getDrilldownsSchemas) => getImageEmbeddableSchema(getDrilldownsSchemas),
+    });
+    plugins.embeddable.registerEmbeddableServerDefinition(BRAND_LOGO_EMBEDDABLE_TYPE, {
+      title: 'Brand logo',
+      getSchema: () => brandLogoEmbeddableSchema,
     });
   }
 

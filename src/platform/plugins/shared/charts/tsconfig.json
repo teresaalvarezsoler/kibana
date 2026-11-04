@@ -18,6 +18,8 @@
     "@kbn/core-lifecycle-browser-mocks",
     "@kbn/palettes",
     "@kbn/config-schema",
+    "@kbn/advanced-settings-plugin",
+    "@kbn/management-settings-section-registry",
   ],
   "exclude": [
     "target/**/*",
