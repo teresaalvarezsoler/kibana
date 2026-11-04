@@ -26,7 +26,7 @@ const CSS_VARS_GUIDANCE = `Use these CSS custom properties — they resolve to t
 - Required body reset: body { margin: 0; padding: var(--cc-space-l); box-sizing: border-box; font-family: var(--cc-font-family); color: var(--cc-color-text); background: var(--cc-color-background); }
 - Card/surface backgrounds: var(--cc-color-surface).
 - Accent colors for UI emphasis: var(--cc-color-primary) (blue), var(--cc-color-accent) (teal), var(--cc-color-accent-2) (pink), var(--cc-color-warning) (yellow).
-- Chart series colors: var(--cc-vis-0) through var(--cc-vis-9), in order. Use these for bars, lines, slices and any per-category color — they are the host's colorblind-safe visualization palette. Do NOT use the semantic accent colors above for data series; they are UI chrome and read heavy when used as data.
+- Chart series colors: var(--cc-vis-0) through var(--cc-vis-9), in order. Use these for bars, lines, slices and any per-category color — they are the host's chart palette (the organization's brand palette when one is set), so the panel's series match the charts beside it. Do NOT use the semantic accent colors above for data series; they are UI chrome and read heavy when used as data.
 - Danger/error: var(--cc-color-danger). Border color: var(--cc-color-border).
 - Spacing (margins, padding, gaps): var(--cc-space-xs) < var(--cc-space-s) < var(--cc-space-m) < var(--cc-space-l) < var(--cc-space-xl). Pick from this scale only — no arbitrary values like 10px or 1.25rem.
 - Corner rounding: var(--cc-radius) for cards and containers, var(--cc-radius-s) for small elements like badges, pills and tags. Use one of these two rather than a literal value.

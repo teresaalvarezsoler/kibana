@@ -6,7 +6,8 @@
  */
 
 import DOMPurify from 'dompurify';
-import type { EuiThemeComputed } from '@elastic/eui';
+import { euiPaletteColorBlind, type EuiThemeComputed } from '@elastic/eui';
+import { setBrandPalettes } from '@kbn/palettes';
 import { applyHtmlTheme, injectCsp, injectStyleTag, sanitizeHtml } from './prepare_html';
 import * as internalLink from './internal_link';
 
@@ -144,6 +145,32 @@ describe('applyHtmlTheme', () => {
     const dark = applyHtmlTheme(markup, 'DARK', euiTheme);
     expect(dark).toContain('--cc-color-background:#fff');
     expect(dark).not.toContain('--cc-color-background:transparent');
+  });
+
+  describe('chart color tokens', () => {
+    afterEach(() => setBrandPalettes(undefined));
+
+    it('uses the Elastic palette when there is no brand palette', () => {
+      const result = applyHtmlTheme('<p>hi</p>', 'LIGHT', euiTheme);
+
+      euiPaletteColorBlind().forEach((color, index) => {
+        expect(result).toContain(`--cc-vis-${index}:${color}`);
+      });
+    });
+
+    it('uses the brand palette and repeats it to fill all ten tokens', () => {
+      setBrandPalettes({
+        categorical: ['#07B9CE', '#9CF2FC', '#3969E7', '#ABBFF5'],
+        lineOptimized: ['#07B9CE', '#3969E7', '#9CF2FC', '#ABBFF5'],
+      });
+
+      const result = applyHtmlTheme('<p>hi</p>', 'LIGHT', euiTheme);
+
+      expect(result).toContain('--cc-vis-0:#07B9CE');
+      expect(result).toContain('--cc-vis-3:#ABBFF5');
+      expect(result).toContain('--cc-vis-4:#07B9CE');
+      expect(result).toContain('--cc-vis-9:#9CF2FC');
+    });
   });
 
   it('sets the color-scheme meta per theme', () => {

@@ -7,7 +7,7 @@
 
 import DOMPurify from 'dompurify';
 import type { EuiThemeColorModeStandard, EuiThemeComputed } from '@elastic/eui';
-import { euiPaletteColorBlind } from '@elastic/eui';
+import { getPalettes, KbnPalette } from '@kbn/palettes';
 import { CUSTOM_CONTENT_CSP_META } from './constants';
 import { isKibanaFramed, toSafeInternalHref, type LinkBasePath } from './internal_link';
 
@@ -66,6 +66,8 @@ body{background:var(--cc-color-background)!important}
 @media screen and (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 `;
 
+const CHART_COLOR_TOKEN_COUNT = 10;
+
 export function buildThemeCss(
   euiTheme: EuiThemeComputed,
   colorMode: EuiThemeColorModeStandard
@@ -104,10 +106,12 @@ export function buildThemeCss(
     ['--cc-ease', t.animation.resistance]
   );
 
-  // This is EUI's own colorblind-safe visualization palette.
-  euiPaletteColorBlind().forEach((color, index) => {
-    vars.push([`--cc-vis-${index}`, color]);
-  });
+  // The default chart palette: the organization's brand palette when one is set, otherwise the
+  // Elastic palette. Short brand palettes repeat, so all ten tokens always resolve.
+  const chartPalette = getPalettes(isDark).get(KbnPalette.Default);
+  for (let index = 0; index < CHART_COLOR_TOKEN_COUNT; index++) {
+    vars.push([`--cc-vis-${index}`, chartPalette.getColor(index, CHART_COLOR_TOKEN_COUNT)]);
+  }
 
   const declarations = vars
     .filter((entry): entry is [string, string | number] => entry[1] != null)
