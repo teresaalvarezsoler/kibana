@@ -103,4 +103,29 @@ describe('brand palette', () => {
       expect(getPalettes(false).get(KbnPalette.Default)).toBe(elasticPalette);
     });
   });
+
+  describe('Elastic option', () => {
+    const listedIds = () =>
+      getPalettes(false)
+        .getAll()
+        .map(({ id }) => id);
+
+    it('is listed next to the brand palettes', () => {
+      setBrandPalettes(brandPalettes);
+
+      expect(listedIds()).toContain(KbnPalette.Elastic);
+      expect(getPalettes(false).get(KbnPalette.Elastic).colors(10)).toEqual(
+        elasticPalette.colors(10)
+      );
+      expect(getPalettes(false).get(KbnPalette.Elastic).tag).toBeUndefined();
+    });
+
+    it('is not listed without brand palettes, where the default is already Elastic', () => {
+      expect(listedIds()).not.toContain(KbnPalette.Elastic);
+    });
+
+    it('still resolves to the Elastic palette after the brand palettes are removed', () => {
+      expect(getPalettes(false).get(KbnPalette.Elastic)).toBe(elasticPalette);
+    });
+  });
 });

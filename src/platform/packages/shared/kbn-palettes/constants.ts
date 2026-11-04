@@ -29,6 +29,10 @@ const categorical = {
    */
   Default: DEFAULT_FALLBACK_PALETTE,
   /**
+   * The Elastic palette as an option when a brand palette replaces the Default palette
+   */
+  Elastic: 'elastic' as const,
+  /**
    * Variant of Default palette optimized for line charts: dark tones first, red/yellow swapped.
    */
   ElasticLineOptimized: 'elastic_line_optimized' as const,

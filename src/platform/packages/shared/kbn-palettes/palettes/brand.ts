@@ -92,7 +92,8 @@ export const createBrandPalettes = (
 ): Record<'brandPalette' | 'brandLineOptimizedPalette', IKbnPalette> => ({
   brandPalette: new KbnCategoricalPalette({
     id: KbnPalette.Default,
-    aliases: defaultPalette.aliases,
+    // The Elastic option keeps its own id while a brand palette is set.
+    aliases: defaultPalette.aliases.filter((alias) => alias !== KbnPalette.Elastic),
     name: i18n.translate('palettes.brand.name', {
       defaultMessage: 'Brand',
     }),
