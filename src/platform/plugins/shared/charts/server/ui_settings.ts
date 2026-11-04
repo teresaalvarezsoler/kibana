@@ -24,7 +24,8 @@ const BRAND_CATEGORY = 'brand';
 const MAX_LOGO_SIZE_IN_BASE64 = Math.floor((MAX_BRAND_LOGO_SIZE_IN_KB * 1024 * 8) / 6);
 
 const hexColorRegex = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i;
-const imageDataUrlRegex = /^data:image\/(?:svg\+xml|jpeg|png|gif);base64,/;
+// SVG only: custom content panels can show the logo only as inline SVG markup.
+const svgDataUrlRegex = /^data:image\/svg\+xml;base64,/;
 
 const validateBrandColor = (color: string) => {
   if (!hexColorRegex.test(color)) {
@@ -42,9 +43,9 @@ const brandColorsSchema = (maxSize: number) =>
   schema.arrayOf(schema.string({ maxLength: 7, validate: validateBrandColor }), { maxSize });
 
 const validateBrandLogo = (logo: string) => {
-  if (!imageDataUrlRegex.test(logo)) {
+  if (!svgDataUrlRegex.test(logo)) {
     return i18n.translate('charts.uiSettings.brandLogo.invalidFile', {
-      defaultMessage: 'Use an SVG, PNG, JPEG or GIF image.',
+      defaultMessage: 'Use an SVG image.',
     });
   }
 };
@@ -101,7 +102,7 @@ export const getUiSettings = (): Record<string, UiSettingsParams> => ({
     }),
     description: i18n.translate('charts.uiSettings.brandLogo.description', {
       defaultMessage:
-        'Your organization logo, for use in dashboards. The image must be smaller than {maxSize} KB. Logos look best with a transparent background.',
+        'Your organization logo as an SVG image smaller than {maxSize} KB, for use in dashboards and custom panels.',
       values: { maxSize: MAX_BRAND_LOGO_SIZE_IN_KB },
     }),
     value: null,

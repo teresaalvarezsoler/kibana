@@ -122,7 +122,7 @@ jest.mock('./telemetry', () => ({ getTelemetry: () => mockTelemetry }));
 jest.mock('./services', () => ({
   getServices: () => ({
     agentBuilder: mockAgentBuilder,
-    core: { http: {} },
+    core: { http: {}, settings: { globalClient: { get: () => null } } },
     search: jest.fn(),
   }),
 }));

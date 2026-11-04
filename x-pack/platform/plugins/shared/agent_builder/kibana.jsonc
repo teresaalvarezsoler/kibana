@@ -41,6 +41,7 @@
       "isomer"
     ],
     "requiredBundles": [
+      "charts",
       "kibanaReact",
       "usageCollection",
       "security",

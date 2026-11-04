@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { BRAND_LOGO_SETTING } from '@kbn/charts-plugin/common';
 import type {
   DefaultEmbeddableApi,
   EmbeddablePublicDefinition,
@@ -131,6 +132,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       http: core.http,
       uiSettings: core.uiSettings,
       search,
+      brandLogo: core.settings.globalClient.get<string | null>(BRAND_LOGO_SETTING, null),
     };
     // The panel's own container is outside the sandboxed iframe, so its height is readable.
     // Captured when the panel is sent to chat so the preview there starts at the size the

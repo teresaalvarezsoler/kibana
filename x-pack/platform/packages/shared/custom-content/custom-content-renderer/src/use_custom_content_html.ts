@@ -16,6 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { fetchEsqlData } from './fetch_esql_data';
 import { fillTemplate } from './fill_template';
 import { sanitizeHtml, applyHtmlTheme } from './prepare_html';
+import { inlineBrandLogo } from './brand_logo';
 import type { CustomContentRendererServices } from './types';
 import { getLinkBasePath } from './internal_link';
 
@@ -73,7 +74,7 @@ export function useCustomContentHtml({
   const [error, setError] = useState<string | undefined>();
 
   const trimmedTemplate = savedTemplate?.trim() || undefined;
-  const { http, uiSettings, search } = services;
+  const { http, uiSettings, search, brandLogo } = services;
 
   useEffect(() => {
     if (trimmedTemplate && !esqlQuery) {
@@ -144,12 +145,16 @@ export function useCustomContentHtml({
     () =>
       filledHtml
         ? applyHtmlTheme(
-            sanitizeHtml(filledHtml, getLinkBasePath(http), isInteractive),
+            sanitizeHtml(
+              inlineBrandLogo(filledHtml, brandLogo),
+              getLinkBasePath(http),
+              isInteractive
+            ),
             colorMode,
             euiTheme
           )
         : '',
-    [filledHtml, http, isInteractive, colorMode, euiTheme]
+    [filledHtml, brandLogo, http, isInteractive, colorMode, euiTheme]
   );
 
   return { html, isLoading, error, noContent: !trimmedTemplate };

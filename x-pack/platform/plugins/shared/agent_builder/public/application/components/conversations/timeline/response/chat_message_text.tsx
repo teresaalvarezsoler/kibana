@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { BRAND_LOGO_SETTING } from '@kbn/charts-plugin/common';
 import React, { useMemo } from 'react';
 import {
   EuiMarkdownFormat,
@@ -70,8 +71,9 @@ export function ChatMessageText({
   const stepsFromPreviousTurns = useStepsFromSavedTurns();
   const { isEmbeddedContext: isSidebar } = useConversationContext();
   const {
-    services: { http, application, uiSettings },
+    services: { http, application, uiSettings, settings },
   } = useKibana();
+  const brandLogo = settings?.globalClient.get<string | null>(BRAND_LOGO_SETTING, null);
 
   const { handleLinkClick, externalLinkModal } = useMarkdownLinkClick();
 
@@ -81,11 +83,20 @@ export function ChatMessageText({
         application,
         http,
         uiSettings,
+        brandLogo,
         startDependencies,
         stepsFromCurrentTurn,
         stepsFromPreviousTurns,
       }),
-    [application, http, uiSettings, startDependencies, stepsFromCurrentTurn, stepsFromPreviousTurns]
+    [
+      application,
+      http,
+      uiSettings,
+      brandLogo,
+      startDependencies,
+      stepsFromCurrentTurn,
+      stepsFromPreviousTurns,
+    ]
   );
 
   const renderAttachmentRenderer = useMemo(

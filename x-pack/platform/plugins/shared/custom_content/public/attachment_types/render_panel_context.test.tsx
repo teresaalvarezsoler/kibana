@@ -20,7 +20,14 @@ jest.mock('@kbn/custom-content-renderer', () => ({
 }));
 
 jest.mock('../services', () => ({
-  getServices: () => ({ core: { http: {}, uiSettings: {} }, search: jest.fn() }),
+  getServices: () => ({
+    core: {
+      http: {},
+      uiSettings: {},
+      settings: { globalClient: { get: () => null } },
+    },
+    search: jest.fn(),
+  }),
 }));
 
 const makeData = (

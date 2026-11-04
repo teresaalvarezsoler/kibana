@@ -18,4 +18,6 @@ export interface CustomContentRendererServices {
   http: HttpStart;
   uiSettings: IUiSettingsClient;
   search: ISearchGeneric;
+  /** The organization's brand logo as an SVG data URL, shown where a template has a `<kbn-brand-logo>`. */
+  brandLogo?: string | null;
 }

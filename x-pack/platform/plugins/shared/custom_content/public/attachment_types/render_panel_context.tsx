@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { BRAND_LOGO_SETTING } from '@kbn/charts-plugin/common';
 import React, { useCallback, useMemo } from 'react';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { css } from '@emotion/react';
@@ -48,7 +49,12 @@ export const RenderPanelContext = ({ data }: { data: CustomContentContextAttachm
   const { core, search } = getServices();
 
   const services = useMemo<CustomContentRendererServices>(
-    () => ({ http: core.http, uiSettings: core.uiSettings, search }),
+    () => ({
+      http: core.http,
+      uiSettings: core.uiSettings,
+      search,
+      brandLogo: core.settings.globalClient.get<string | null>(BRAND_LOGO_SETTING, null),
+    }),
     [core, search]
   );
 

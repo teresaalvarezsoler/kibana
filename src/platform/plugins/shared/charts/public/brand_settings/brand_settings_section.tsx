@@ -51,7 +51,8 @@ interface BrandSettings {
 }
 
 const hexColorRegex = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i;
-const supportedLogoTypes = ['image/svg+xml', 'image/png', 'image/jpeg', 'image/gif'];
+// SVG only: custom content panels can show the logo only as inline SVG markup.
+const supportedLogoTypes = ['image/svg+xml'];
 
 const readSettings = (globalClient: IUiSettingsClient): BrandSettings => ({
   brandColors: globalClient.get<string[]>(BRAND_PALETTE_SETTING, []),
@@ -179,7 +180,7 @@ export const BrandSettingsSection = ({
     if (!supportedLogoTypes.includes(file.type)) {
       setLogoError(
         i18n.translate('charts.brandSettings.logoTypeError', {
-          defaultMessage: 'Use an SVG, PNG, JPEG or GIF image.',
+          defaultMessage: 'Use an SVG image.',
         })
       );
       return;
@@ -315,7 +316,7 @@ export const BrandSettingsSection = ({
         }
         description={i18n.translate('charts.brandSettings.logoDescription', {
           defaultMessage:
-            'Shown in a banner at the top of dashboards. Use an image smaller than {maxSize} KB, ideally with a transparent background.',
+            'Shown in a banner at the top of dashboards and available to custom panels. Use an SVG image smaller than {maxSize} KB, ideally with a transparent background.',
           values: { maxSize: MAX_BRAND_LOGO_SIZE_IN_KB },
         })}
       >

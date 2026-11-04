@@ -46,6 +46,7 @@ export function createVisualizationRenderer({
   application,
   http,
   uiSettings,
+  brandLogo,
   startDependencies,
   stepsFromCurrentTurn,
   stepsFromPreviousTurns,
@@ -53,6 +54,8 @@ export function createVisualizationRenderer({
   application: ApplicationStart;
   http: HttpStart;
   uiSettings: IUiSettingsClient;
+  /** The organization's brand logo, shown in custom content panels. */
+  brandLogo?: string | null;
   startDependencies: AgentBuilderStartDependencies;
   stepsFromCurrentTurn: ConversationRoundStep[];
   stepsFromPreviousTurns: ConversationRoundStep[];
@@ -68,6 +71,7 @@ export function createVisualizationRenderer({
       http,
       uiSettings,
       search: startDependencies.data.search.search,
+      brandLogo,
     },
   };
 

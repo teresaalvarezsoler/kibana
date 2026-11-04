@@ -5,6 +5,7 @@
   },
   "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*", "test/scout/**/*"],
   "kbn_references": [
+    "@kbn/charts-plugin",
     "@kbn/core",
     "@kbn/embeddable-plugin",
     "@kbn/presentation-publishing",

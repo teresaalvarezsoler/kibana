@@ -9,6 +9,7 @@
     "id": "customContent",
     "browser": true,
     "server": true,
+    "requiredBundles": ["charts"],
     "requiredPlugins": [
       "embeddable",
       "data",

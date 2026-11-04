@@ -62,6 +62,7 @@ const BASE_STYLES = `
 body{margin:0;padding:var(--cc-space-l);box-sizing:border-box;font-family:var(--cc-font-family);color:var(--cc-color-text)}
 *,*::before,*::after{box-sizing:inherit}
 body{background:var(--cc-color-background)!important}
+.cc-brand-logo{display:inline-block;height:2.5em;line-height:0}.cc-brand-logo svg{height:100%;width:auto;max-width:100%}
 @media screen and (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 `;
 

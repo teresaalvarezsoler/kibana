@@ -26,3 +26,4 @@ export {
 } from './src/prepare_html';
 export { CUSTOM_CONTENT_CSP_META } from './src/constants';
 export { getLinkBasePath } from './src/internal_link';
+export { BRAND_LOGO_PLACEHOLDER, BRAND_LOGO_CLASS } from './src/brand_logo';

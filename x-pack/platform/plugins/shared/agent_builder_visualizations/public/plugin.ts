@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { BRAND_LOGO_SETTING } from '@kbn/charts-plugin/common';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { VISUALIZATION_ATTACHMENT_TYPE } from '@kbn/agent-builder-visualizations-common';
 import { createVisualizationAttachmentDefinition } from './attachment_types/visualization_attachment';
@@ -53,6 +54,7 @@ export class AgentBuilderVisualizationsPublicPlugin
           http: core.http,
           uiSettings: core.uiSettings,
           search: plugins.data.search.search,
+          brandLogo: core.settings.globalClient.get<string | null>(BRAND_LOGO_SETTING, null),
         },
       })
     );
