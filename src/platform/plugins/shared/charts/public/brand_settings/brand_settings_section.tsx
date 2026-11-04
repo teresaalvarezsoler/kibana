@@ -210,7 +210,8 @@ export const BrandSettingsSection = ({
       setDraft(toSave);
       toasts.addSuccess(
         i18n.translate('charts.brandSettings.saved', {
-          defaultMessage: 'Brand settings saved. Reload the page to apply them.',
+          defaultMessage:
+            'Brand settings saved. Charts use the new palettes as soon as they redraw.',
         })
       );
     } catch (error) {
@@ -236,7 +237,7 @@ export const BrandSettingsSection = ({
         <p>
           {i18n.translate('charts.brandSettings.description', {
             defaultMessage:
-              'Use your brand colors and logo across Kibana. The brand palettes replace the default Elastic palettes in all charts, except charts that already use another palette. Changes apply after you reload the page.',
+              'Use your brand colors and logo across Kibana. The brand palettes replace the default Elastic palettes in all charts, except charts that already use another palette.',
           })}
         </p>
       </EuiText>

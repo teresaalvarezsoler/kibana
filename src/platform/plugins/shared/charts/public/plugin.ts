@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Plugin, CoreSetup } from '@kbn/core/public';
+import { BehaviorSubject, Subscription, filter } from 'rxjs';
+import type { Plugin, CoreSetup, IUiSettingsClient } from '@kbn/core/public';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import type { AdvancedSettingsSetup } from '@kbn/advanced-settings-plugin/public';
 import { setBrandPalettes } from '@kbn/palettes';
@@ -24,6 +25,19 @@ import { ThemeService } from './services';
 import { PaletteService } from './services/palettes/service';
 import { ActiveCursor } from './services/active_cursor';
 import { registerBrandSettingsSection } from './brand_settings';
+
+const BRAND_PALETTE_SETTINGS: readonly string[] = [
+  BRAND_PALETTE_SETTING,
+  BRAND_CATEGORICAL_PALETTE_SETTING,
+  BRAND_LINE_OPTIMIZED_PALETTE_SETTING,
+];
+
+const readBrandPalettes = (globalClient: IUiSettingsClient) =>
+  resolveBrandPalettes({
+    brandColors: globalClient.get<string[]>(BRAND_PALETTE_SETTING, []),
+    categorical: globalClient.get<string[]>(BRAND_CATEGORICAL_PALETTE_SETTING, []),
+    lineOptimized: globalClient.get<string[]>(BRAND_LINE_OPTIMIZED_PALETTE_SETTING, []),
+  });
 
 interface SetupDependencies {
   expressions: ExpressionsSetup;
@@ -47,25 +61,29 @@ export class ChartsPlugin implements Plugin<ChartsPluginSetup, ChartsPluginStart
   private readonly paletteService = new PaletteService();
   private readonly activeCursor = new ActiveCursor();
 
+  private readonly subscriptions = new Subscription();
+
   private palettes: undefined | ReturnType<PaletteService['setup']>;
 
   public setup(core: CoreSetup, dependencies: SetupDependencies): ChartsPluginSetup {
     dependencies.expressions.registerFunction(palette);
     dependencies.expressions.registerFunction(systemPalette);
-    // Must run before any palette is built so every consumer picks up the brand palettes.
     const { globalClient } = core.settings;
-    setBrandPalettes(
-      resolveBrandPalettes({
-        brandColors: globalClient.get<string[]>(BRAND_PALETTE_SETTING, []),
-        categorical: globalClient.get<string[]>(BRAND_CATEGORICAL_PALETTE_SETTING, []),
-        lineOptimized: globalClient.get<string[]>(BRAND_LINE_OPTIMIZED_PALETTE_SETTING, []),
-      })
+    // The brand palettes are set before any palette is built, and again whenever the brand
+    // settings are saved, so charts use them without a page reload.
+    const brandPalettes$ = new BehaviorSubject(readBrandPalettes(globalClient));
+    this.subscriptions.add(brandPalettes$.subscribe(setBrandPalettes));
+    this.subscriptions.add(
+      globalClient
+        .getUpdate$()
+        .pipe(filter(({ key }) => BRAND_PALETTE_SETTINGS.includes(key)))
+        .subscribe(() => brandPalettes$.next(readBrandPalettes(globalClient)))
     );
     if (dependencies.advancedSettings) {
       registerBrandSettingsSection(dependencies.advancedSettings, globalClient);
     }
     this.themeService.init(core.theme);
-    this.palettes = this.paletteService.setup(core.theme.theme$);
+    this.palettes = this.paletteService.setup(core.theme.theme$, brandPalettes$);
     this.activeCursor.setup();
 
     return {
@@ -80,5 +98,9 @@ export class ChartsPlugin implements Plugin<ChartsPluginSetup, ChartsPluginStart
       palettes: this.palettes!,
       activeCursor: this.activeCursor,
     };
+  }
+
+  public stop() {
+    this.subscriptions.unsubscribe();
   }
 }

@@ -11,7 +11,16 @@ import type { PaletteRegistry, PaletteDefinition } from '@kbn/coloring';
 import { getActivePaletteName } from '@kbn/coloring';
 import type { CoreTheme } from '@kbn/core/public';
 import type { Observable } from 'rxjs';
-import { distinctUntilChanged, firstValueFrom, from, map, shareReplay, switchMap } from 'rxjs';
+import {
+  combineLatest,
+  distinctUntilChanged,
+  firstValueFrom,
+  from,
+  map,
+  of,
+  shareReplay,
+  switchMap,
+} from 'rxjs';
 
 export interface PaletteServiceSetup {
   /**
@@ -23,18 +32,26 @@ export interface PaletteServiceSetup {
   getPalettes: () => Promise<PaletteRegistry>;
   /**
    * An observable of the palette registry that emits a new registry whenever the
-   * theme values relevant to palettes (dark mode / theme name) change.
+   * theme values relevant to palettes (dark mode / theme name) or the brand palettes change.
    */
   getPalettes$: () => Observable<PaletteRegistry>;
 }
 
 export class PaletteService {
   private theme$?: Observable<CoreTheme>;
+  private brandPalettesChange$: Observable<unknown> = of(undefined);
   private palettes$?: Observable<PaletteRegistry>;
   private currentPalettes?: Record<string, PaletteDefinition<unknown>>;
 
-  public setup(theme$: Observable<CoreTheme>): PaletteServiceSetup {
+  /**
+   * @param brandPalettesChange$ emits when the brand palettes change, so the palettes are rebuilt.
+   */
+  public setup(
+    theme$: Observable<CoreTheme>,
+    brandPalettesChange$?: Observable<unknown>
+  ): PaletteServiceSetup {
     this.theme$ = theme$;
+    if (brandPalettesChange$) this.brandPalettesChange$ = brandPalettesChange$;
     return {
       getPalettes: () => firstValueFrom(this.getPalettes$()),
       getPalettes$: () => this.getPalettes$(),
@@ -48,13 +65,19 @@ export class PaletteService {
 
     if (!this.palettes$) {
       const theme$ = this.theme$;
+      const brandPalettesChange$ = this.brandPalettesChange$;
       this.palettes$ = from(import('./palettes')).pipe(
         switchMap(({ buildPalettes }) =>
-          theme$.pipe(
-            distinctUntilChanged(
-              (previous, next) => previous.darkMode === next.darkMode && previous.name === next.name
+          combineLatest([
+            theme$.pipe(
+              distinctUntilChanged(
+                (previous, next) =>
+                  previous.darkMode === next.darkMode && previous.name === next.name
+              )
             ),
-            map((theme) => {
+            brandPalettesChange$,
+          ]).pipe(
+            map(([theme]) => {
               this.currentPalettes = buildPalettes(theme);
               return this.createRegistry();
             })

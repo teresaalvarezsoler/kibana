@@ -107,4 +107,19 @@ describe('PaletteService', () => {
     await flush();
     expect(registry.get('default').title).toBe('default-dark');
   });
+
+  it('rebuilds palettes when the brand palettes change', async () => {
+    const theme$ = new BehaviorSubject<CoreTheme>(lightTheme);
+    const brandPalettesChange$ = new BehaviorSubject<string>('ing');
+    const { getPalettes$ } = new PaletteService().setup(theme$, brandPalettesChange$);
+
+    const subscription = getPalettes$().subscribe();
+    await flush();
+
+    brandPalettesChange$.next('canva');
+    await flush();
+
+    expect(buildPalettesMock).toHaveBeenCalledTimes(2);
+    subscription.unsubscribe();
+  });
 });
