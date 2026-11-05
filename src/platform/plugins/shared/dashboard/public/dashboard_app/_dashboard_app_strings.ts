@@ -182,6 +182,11 @@ export const topNavStrings = {
       defaultMessage: 'Full Screen Mode',
     }),
   },
+  highDensity: {
+    label: i18n.translate('dashboard.topNave.highDensityButtonLabel', {
+      defaultMessage: 'Increase density on wide screens',
+    }),
+  },
   edit: {
     label: i18n.translate('dashboard.topNave.editButtonAriaLabel', {
       defaultMessage: 'edit',

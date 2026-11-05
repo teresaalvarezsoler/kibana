@@ -28,6 +28,7 @@ import { getAccessControlClient } from '../../services/access_control_service';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
 import { openSettingsFlyout } from '../../dashboard_renderer/settings/open_settings_flyout';
+import { highDensity$, setHighDensity } from '../../dashboard_renderer/grid/high_density';
 import { getDashboardBackupService } from '../../services/dashboard_api_services';
 import type { DashboardRedirect } from '../types';
 import {
@@ -73,6 +74,21 @@ export const useDashboardMenuItems = ({
       dashboardInternalApi.canRedo$,
       dashboardInternalApi.canUndo$
     );
+
+  const highDensity = useObservable(highDensity$, highDensity$.getValue());
+  const highDensityMenuItem = useMemo(
+    (): AppMenuItemType => ({
+      order: 7,
+      overflow: true,
+      label: topNavStrings.highDensity.label,
+      id: 'high-density',
+      testId: 'dashboardHighDensityToggle',
+      // the overflow menu has no switch control, so a checkmark shows the toggle state
+      iconType: highDensity ? 'check' : 'empty',
+      run: () => setHighDensity(!highDensity),
+    }),
+    [highDensity]
+  );
 
   const disableTopNav = isSaveInProgress || hasOverlays;
   const { isInEditAccessMode, canManageAccessControl } = useMemo(
@@ -443,7 +459,7 @@ export const useDashboardMenuItems = ({
   const viewModeTopNavConfig = useMemo(() => {
     const { showWriteControls, storeSearchSession } = getDashboardCapabilities();
 
-    const items: AppMenuItemType[] = [menuItems.fullScreen];
+    const items: AppMenuItemType[] = [menuItems.fullScreen, highDensityMenuItem];
 
     if (showWriteControls) {
       items.push(menuItems.duplicate);
@@ -482,6 +498,7 @@ export const useDashboardMenuItems = ({
     return { ...viewModeConfig, historyConfig };
   }, [
     menuItems.fullScreen,
+    highDensityMenuItem,
     menuItems.duplicate,
     menuItems.export,
     menuItems.share,

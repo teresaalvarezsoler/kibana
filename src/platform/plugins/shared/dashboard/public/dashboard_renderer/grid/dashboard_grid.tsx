@@ -11,12 +11,16 @@ import classNames from 'classnames';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { UseEuiTheme } from '@elastic/eui';
+import { useResizeObserver } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { GridLayoutData, GridPanelData } from '@kbn/grid-layout';
-import { GridLayout } from '@kbn/grid-layout';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { GridLayout, splitLayoutIntoColumns } from '@kbn/grid-layout';
+import {
+  useBatchedPublishingSubjects,
+  useStateFromPublishingSubject,
+} from '@kbn/presentation-publishing';
 
 import type { GridData } from '@kbn/as-code-dashboard-schema';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../common/page_bundle_constants';
@@ -29,12 +33,20 @@ import {
   DEFAULT_DASHBOARD_DRAG_TOP_OFFSET,
 } from './constants';
 import { DashboardGridItem } from './dashboard_grid_item';
+import { HIGH_DENSITY_COLUMN_COUNT, HIGH_DENSITY_MIN_WIDTH, highDensity$ } from './high_density';
 import { useLayoutStyles } from './use_layout_styles';
 
 export const DashboardGrid = () => {
   const dashboardApi = useDashboardApi();
   const dashboardInternalApi = useDashboardInternalApi();
   const layoutRef = useRef<HTMLDivElement | null>(null);
+  const [layoutElement, setLayoutElement] = useState<HTMLDivElement | null>(null);
+  const { width: layoutWidth } = useResizeObserver(layoutElement, 'width');
+  const highDensity = useStateFromPublishingSubject(highDensity$);
+  const setLayoutRefs = useCallback((element: HTMLDivElement | null) => {
+    layoutRef.current = element;
+    setLayoutElement(element);
+  }, []);
 
   const layoutStyles = useLayoutStyles();
   const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
@@ -159,18 +171,59 @@ export const DashboardGrid = () => {
     };
   }, [dashboardApi]);
 
+  /**
+   * On wide screens, viewers can opt into a high density layout that shows sections and
+   * bands of panels side by side, so panels keep the proportions they were designed with.
+   */
+  const isHighDensity =
+    highDensity &&
+    viewMode === 'view' &&
+    expandedPanelId === undefined &&
+    layoutWidth >= HIGH_DENSITY_MIN_WIDTH;
+
+  const columnLayouts = useMemo(
+    () => (isHighDensity ? splitLayoutIntoColumns(layout, HIGH_DENSITY_COLUMN_COUNT) : undefined),
+    [isHighDensity, layout]
+  );
+
   const memoizedGridLayout = useMemo(() => {
+    const gridSettings = {
+      gutterSize: useMargins ? DASHBOARD_MARGIN_SIZE : 0,
+      rowHeight: DASHBOARD_GRID_HEIGHT,
+      columnCount: DASHBOARD_GRID_COLUMN_COUNT,
+      keyboardDragTopLimit: topOffset,
+    };
+
+    if (columnLayouts) {
+      return (
+        <div css={highDensityStyles.columns} data-test-subj="dshHighDensityLayout">
+          {columnLayouts.map((columnLayout, index) => (
+            <div
+              key={index}
+              css={highDensityStyles.column}
+              style={index > 0 ? { marginLeft: -gridSettings.gutterSize } : undefined}
+            >
+              <GridLayout
+                css={layoutStyles}
+                layout={columnLayout}
+                gridSettings={gridSettings}
+                useCustomDragHandle={true}
+                renderPanelContents={renderPanelContents}
+                onLayoutChange={onLayoutChange}
+                accessMode="VIEW"
+              />
+            </div>
+          ))}
+        </div>
+      );
+    }
+
     // memoizing this component reduces the number of times it gets re-rendered to a minimum
     return (
       <GridLayout
         css={layoutStyles}
         layout={layout}
-        gridSettings={{
-          gutterSize: useMargins ? DASHBOARD_MARGIN_SIZE : 0,
-          rowHeight: DASHBOARD_GRID_HEIGHT,
-          columnCount: DASHBOARD_GRID_COLUMN_COUNT,
-          keyboardDragTopLimit: topOffset,
-        }}
+        gridSettings={gridSettings}
         useCustomDragHandle={true}
         renderPanelContents={renderPanelContents}
         onLayoutChange={onLayoutChange}
@@ -179,6 +232,7 @@ export const DashboardGrid = () => {
       />
     );
   }, [
+    columnLayouts,
     layoutStyles,
     layout,
     useMargins,
@@ -203,7 +257,7 @@ export const DashboardGrid = () => {
 
   return (
     <div
-      ref={layoutRef}
+      ref={setLayoutRefs}
       className={classNames({
         'dshLayout--editing': viewMode === 'edit',
         'dshLayout-withoutMargins': !useMargins,
@@ -223,6 +277,18 @@ const convertGridPanelToDashboardGridData = (panel: GridPanelData): GridData => 
     w: panel.width,
     h: panel.height,
   };
+};
+
+const highDensityStyles = {
+  columns: css({
+    display: 'flex',
+    alignItems: 'flex-start',
+  }),
+  // equal flex bases; later columns overlap the previous column's outer gutter
+  column: css({
+    flex: '1 1 0',
+    minWidth: 0,
+  }),
 };
 
 const dashboardGridStyles = {
