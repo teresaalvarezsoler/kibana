@@ -29,13 +29,13 @@ export const DEFAULT_PANEL_HEIGHT = 15;
 
 export const DEFAULT_DASHBOARD_OPTIONS = {
   auto_apply_filters: true,
+  full_width: false,
   hide_panel_borders: false,
   hide_panel_titles: false,
   sync_colors: false,
   sync_cursor: true,
   sync_tooltips: false,
   use_margins: true,
-  full_width: false,
 } as const;
 
 export const DASHBOARD_CHANGE_HISTORY_API_PATH = '/internal/dashboard/change_history' as const;

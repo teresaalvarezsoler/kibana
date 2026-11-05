@@ -11,16 +11,12 @@ import classNames from 'classnames';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { useResizeObserver } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { GridLayoutData, GridPanelData } from '@kbn/grid-layout';
 import { GridLayout, mergeColumnLayouts, splitLayoutIntoColumns } from '@kbn/grid-layout';
-import {
-  useBatchedPublishingSubjects,
-  useStateFromPublishingSubject,
-} from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import type { GridData } from '@kbn/as-code-dashboard-schema';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../common/page_bundle_constants';
@@ -33,20 +29,18 @@ import {
   DEFAULT_DASHBOARD_DRAG_TOP_OFFSET,
 } from './constants';
 import { DashboardGridItem } from './dashboard_grid_item';
-import { HIGH_DENSITY_COLUMN_COUNT, HIGH_DENSITY_MIN_WIDTH, highDensity$ } from './high_density';
+import { HIGH_DENSITY_COLUMN_COUNT } from './high_density';
 import { useLayoutStyles } from './use_layout_styles';
 
-export const DashboardGrid = () => {
+export const DashboardGrid = ({
+  showColumns = false,
+}: {
+  /** Show sections and bands of panels side by side in high density columns. */
+  showColumns?: boolean;
+}) => {
   const dashboardApi = useDashboardApi();
   const dashboardInternalApi = useDashboardInternalApi();
   const layoutRef = useRef<HTMLDivElement | null>(null);
-  const [layoutElement, setLayoutElement] = useState<HTMLDivElement | null>(null);
-  const { width: layoutWidth } = useResizeObserver(layoutElement, 'width');
-  const highDensity = useStateFromPublishingSubject(highDensity$);
-  const setLayoutRefs = useCallback((element: HTMLDivElement | null) => {
-    layoutRef.current = element;
-    setLayoutElement(element);
-  }, []);
 
   const layoutStyles = useLayoutStyles();
   const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
@@ -172,19 +166,9 @@ export const DashboardGrid = () => {
     };
   }, [dashboardApi]);
 
-  /**
-   * On wide screens, viewers can opt into a high density layout that shows sections and
-   * bands of panels side by side, so panels keep the proportions they were designed with.
-   */
-  const isHighDensity =
-    highDensity &&
-    viewMode !== 'print' &&
-    expandedPanelId === undefined &&
-    layoutWidth >= HIGH_DENSITY_MIN_WIDTH;
-
   const columnLayouts = useMemo(
-    () => (isHighDensity ? splitLayoutIntoColumns(layout, HIGH_DENSITY_COLUMN_COUNT) : undefined),
-    [isHighDensity, layout]
+    () => (showColumns ? splitLayoutIntoColumns(layout, HIGH_DENSITY_COLUMN_COUNT) : undefined),
+    [showColumns, layout]
   );
 
   /**
@@ -283,7 +267,7 @@ export const DashboardGrid = () => {
 
   return (
     <div
-      ref={setLayoutRefs}
+      ref={layoutRef}
       className={classNames({
         'dshLayout--editing': viewMode === 'edit',
         'dshLayout-withoutMargins': !useMargins,

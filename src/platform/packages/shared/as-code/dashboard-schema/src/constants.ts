@@ -14,11 +14,11 @@ export const MAX_PANELS = 1000;
 
 export const DEFAULT_DASHBOARD_OPTIONS = {
   auto_apply_filters: true,
+  full_width: false,
   hide_panel_borders: false,
   hide_panel_titles: false,
   sync_colors: false,
   sync_cursor: true,
   sync_tooltips: false,
   use_margins: true,
-  full_width: false,
 } as const;

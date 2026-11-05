@@ -66,14 +66,9 @@ describe('transformDashboardOut', () => {
       Object {
         "dashboardState": Object {
           "options": Object {
-            "auto_apply_filters": true,
-            "full_width": false,
-            "hide_panel_borders": false,
-            "hide_panel_titles": false,
-            "sync_colors": false,
-            "sync_cursor": true,
-            "sync_tooltips": false,
-            "use_margins": true,
+${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
+  .slice(2, -2)
+  .replaceAll('.', ' '.repeat(12))},
           },
           "panels": Array [],
           "pinned_panels": Array [],

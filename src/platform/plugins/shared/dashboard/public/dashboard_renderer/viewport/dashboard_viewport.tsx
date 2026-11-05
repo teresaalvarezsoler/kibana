@@ -8,16 +8,20 @@
  */
 
 import classNames from 'classnames';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
-import { EuiPortal, type UseEuiTheme } from '@elastic/eui';
+import { EuiPortal, useResizeObserver, type UseEuiTheme } from '@elastic/eui';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import {
+  useBatchedPublishingSubjects,
+  useStateFromPublishingSubject,
+} from '@kbn/presentation-publishing';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import { DashboardGrid } from '../grid';
 import { DASHBOARD_MAX_WIDTH } from '../grid/constants';
+import { HIGH_DENSITY_MIN_WIDTH, highDensity$ } from '../grid/high_density';
 import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
 
 export const DashboardViewport = () => {
@@ -42,6 +46,15 @@ export const DashboardViewport = () => {
     dashboardApi.settings.fullWidth$,
     dashboardApi.fullScreenMode$
   );
+  const highDensity = useStateFromPublishingSubject(highDensity$);
+  const [wrapperElement, setWrapperElement] = useState<HTMLDivElement | null>(null);
+  const { width: availableWidth } = useResizeObserver(wrapperElement, 'width');
+
+  // a maximized panel and print layouts always use the available width
+  const canAdaptWidth = !expandedPanelId && viewMode !== 'print';
+  const showColumns = canAdaptWidth && highDensity && availableWidth >= HIGH_DENSITY_MIN_WIDTH;
+  const isFixedWidth = canAdaptWidth && !showColumns && !fullWidth;
+
   const onExit = useCallback(() => {
     dashboardApi.setFullScreenMode(false);
   }, [dashboardApi]);
@@ -62,14 +75,14 @@ export const DashboardViewport = () => {
     'dshDashboardViewport--empty': panelCount === 0 && sectionCount === 0,
     'dshDashboardViewport--print': viewMode === 'print',
     'dshDashboardViewport--panelExpanded': Boolean(expandedPanelId),
-    // a maximized panel and print layouts always use the available width
-    'dshDashboardViewport--fixedWidth': !fullWidth && !expandedPanelId && viewMode !== 'print',
+    'dshDashboardViewport--fixedWidth': isFixedWidth,
   });
 
   const styles = useMemoCss(dashboardViewportStyles);
 
   return (
     <div
+      ref={setWrapperElement}
       className={classNames('dshDashboardViewportWrapper', {
         'dshDashboardViewportWrapper--defaultBg': !useMargins,
         'dshDashboardViewportWrapper--isFullscreen': fullScreenMode,
@@ -91,7 +104,11 @@ export const DashboardViewport = () => {
         data-view-mode={viewMode}
         data-test-subj={'dshDashboardViewport'}
       >
-        {panelCount === 0 && sectionCount === 0 ? <DashboardEmptyScreen /> : <DashboardGrid />}
+        {panelCount === 0 && sectionCount === 0 ? (
+          <DashboardEmptyScreen />
+        ) : (
+          <DashboardGrid showColumns={showColumns} />
+        )}
       </div>
     </div>
   );
