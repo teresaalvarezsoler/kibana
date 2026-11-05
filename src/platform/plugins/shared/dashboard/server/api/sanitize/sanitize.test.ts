@@ -38,6 +38,7 @@ describe('sanitize', () => {
       hide_panel_titles: false,
       hide_panel_borders: false,
       use_margins: true,
+      full_width: false,
       sync_colors: false,
       sync_tooltips: false,
       sync_cursor: false,

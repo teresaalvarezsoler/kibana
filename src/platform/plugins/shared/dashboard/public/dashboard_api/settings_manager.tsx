@@ -43,6 +43,7 @@ const comparators: StateComparators<DashboardSettings> = {
   auto_apply_filters: 'referenceEquality',
   time_restore: 'referenceEquality',
   use_margins: 'referenceEquality',
+  full_width: 'referenceEquality',
   project_routing_restore: 'referenceEquality',
   tags: 'deepEquality',
 };
@@ -106,6 +107,7 @@ export function initializeSettingsManager(initialState: DashboardState) {
         syncCursor$: stateManager.api.syncCursor$,
         syncTooltips$: stateManager.api.syncTooltips$,
         useMargins$: stateManager.api.useMargins$,
+        fullWidth$: stateManager.api.fullWidth$,
       },
     },
     internalApi: {

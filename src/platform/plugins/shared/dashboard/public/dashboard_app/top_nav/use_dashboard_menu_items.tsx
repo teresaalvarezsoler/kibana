@@ -64,16 +64,25 @@ export const useDashboardMenuItems = ({
   const dashboardApi = useDashboardApi();
   const dashboardInternalApi = useDashboardInternalApi();
 
-  const [hasOverlays, hasUnsavedChanges, lastSavedId, viewMode, accessControl, canRedo, canUndo] =
-    useBatchedPublishingSubjects(
-      dashboardApi.hasOverlays$,
-      dashboardApi.hasUnsavedChanges$,
-      dashboardApi.savedObjectId$,
-      dashboardApi.viewMode$,
-      dashboardApi.accessControl$,
-      dashboardInternalApi.canRedo$,
-      dashboardInternalApi.canUndo$
-    );
+  const [
+    hasOverlays,
+    hasUnsavedChanges,
+    lastSavedId,
+    viewMode,
+    accessControl,
+    fullWidth,
+    canRedo,
+    canUndo,
+  ] = useBatchedPublishingSubjects(
+    dashboardApi.hasOverlays$,
+    dashboardApi.hasUnsavedChanges$,
+    dashboardApi.savedObjectId$,
+    dashboardApi.viewMode$,
+    dashboardApi.accessControl$,
+    dashboardApi.settings.fullWidth$,
+    dashboardInternalApi.canRedo$,
+    dashboardInternalApi.canUndo$
+  );
 
   const highDensity = useObservable(highDensity$, highDensity$.getValue());
   const highDensityMenuItem = useMemo(
@@ -459,7 +468,9 @@ export const useDashboardMenuItems = ({
   const viewModeTopNavConfig = useMemo(() => {
     const { showWriteControls, storeSearchSession } = getDashboardCapabilities();
 
-    const items: AppMenuItemType[] = [menuItems.fullScreen, highDensityMenuItem];
+    const items: AppMenuItemType[] = [menuItems.fullScreen];
+    // two columns only kick in on full-width dashboards, so only offer the toggle there
+    if (fullWidth) items.push(highDensityMenuItem);
 
     if (showWriteControls) {
       items.push(menuItems.duplicate);
@@ -499,6 +510,7 @@ export const useDashboardMenuItems = ({
   }, [
     menuItems.fullScreen,
     highDensityMenuItem,
+    fullWidth,
     menuItems.duplicate,
     menuItems.export,
     menuItems.share,
@@ -521,6 +533,7 @@ export const useDashboardMenuItems = ({
       menuItems.settings,
       menuItems.history,
     ];
+    if (fullWidth) items.push(highDensityMenuItem);
 
     if (shareAction) {
       items.push(menuItems.share);
@@ -547,6 +560,8 @@ export const useDashboardMenuItems = ({
 
     return { ...editModeConfig, historyConfig };
   }, [
+    highDensityMenuItem,
+    fullWidth,
     menuItems.switchToViewMode,
     menuItems.export,
     menuItems.share,

@@ -35,6 +35,7 @@ export const DEFAULT_DASHBOARD_OPTIONS = {
   sync_cursor: true,
   sync_tooltips: false,
   use_margins: true,
+  full_width: false,
 } as const;
 
 export const DASHBOARD_CHANGE_HISTORY_API_PATH = '/internal/dashboard/change_history' as const;

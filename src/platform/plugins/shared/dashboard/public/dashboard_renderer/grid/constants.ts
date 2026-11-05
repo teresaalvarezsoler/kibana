@@ -10,3 +10,9 @@
 export const DASHBOARD_GRID_HEIGHT = 20;
 export const DASHBOARD_MARGIN_SIZE = 8;
 export const DEFAULT_DASHBOARD_DRAG_TOP_OFFSET = 200;
+
+/**
+ * Maximum width, in pixels, of a dashboard that doesn't use the full screen width. Wider
+ * screens center the dashboard instead of stretching panels.
+ */
+export const DASHBOARD_MAX_WIDTH = 1600;

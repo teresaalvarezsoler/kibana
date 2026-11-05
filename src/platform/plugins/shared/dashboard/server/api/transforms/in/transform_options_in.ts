@@ -13,6 +13,7 @@ const APIToSavedObjectOptionsKeys = {
   hide_panel_titles: 'hidePanelTitles',
   hide_panel_borders: 'hidePanelBorders',
   use_margins: 'useMargins',
+  full_width: 'fullWidth',
   sync_colors: 'syncColors',
   sync_tooltips: 'syncTooltips',
   sync_cursor: 'syncCursor',

@@ -13,7 +13,7 @@ import { BehaviorSubject } from 'rxjs';
  * Minimum grid width, in pixels, at which the high density layout kicks in. Each column then
  * stays at least as wide as a dashboard on a typical laptop, so laptops keep the normal layout.
  */
-export const HIGH_DENSITY_MIN_WIDTH = 2000;
+export const HIGH_DENSITY_MIN_WIDTH = 1800;
 
 /** Number of side-by-side columns used by the high density layout. */
 export const HIGH_DENSITY_COLUMN_COUNT = 2;

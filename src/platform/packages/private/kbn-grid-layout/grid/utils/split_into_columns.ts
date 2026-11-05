@@ -122,3 +122,18 @@ export const splitLayoutIntoColumns = (
     return getGridLayout(sections);
   });
 };
+
+/**
+ * Reverses `splitLayoutIntoColumns`: stacks the columns one after the other, in reading
+ * order, into a single layout. Used to save edits made while the layout is split.
+ */
+export const mergeColumnLayouts = (columns: GridLayoutData[]): GridLayoutData => {
+  const sections: OrderedLayout = {};
+  columns.forEach((columnLayout, columnIndex) => {
+    getSectionsInOrder(getOrderedLayout(columnLayout)).forEach((section) => {
+      const id = section.isMainSection ? `column-${columnIndex}-${section.id}` : section.id;
+      sections[id] = { ...section, id, order: Object.keys(sections).length };
+    });
+  });
+  return getGridLayout(sections);
+};

@@ -66,9 +66,14 @@ describe('transformDashboardOut', () => {
       Object {
         "dashboardState": Object {
           "options": Object {
-${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
-  .slice(2, -2)
-  .replaceAll('.', ' '.repeat(12))},
+            "auto_apply_filters": true,
+            "full_width": false,
+            "hide_panel_borders": false,
+            "hide_panel_titles": false,
+            "sync_colors": false,
+            "sync_cursor": true,
+            "sync_tooltips": false,
+            "use_margins": true,
           },
           "panels": Array [],
           "pinned_panels": Array [],
@@ -135,6 +140,7 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
           "filters": Array [],
           "options": Object {
             "auto_apply_filters": false,
+            "full_width": false,
             "hide_panel_borders": false,
             "hide_panel_titles": true,
             "sync_colors": false,
@@ -237,6 +243,7 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
           "filters": Array [],
           "options": Object {
             "auto_apply_filters": false,
+            "full_width": false,
             "hide_panel_borders": false,
             "hide_panel_titles": true,
             "sync_colors": false,

@@ -17,6 +17,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import { DashboardGrid } from '../grid';
+import { DASHBOARD_MAX_WIDTH } from '../grid/constants';
 import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
 
 export const DashboardViewport = () => {
@@ -29,6 +30,7 @@ export const DashboardViewport = () => {
     layout,
     viewMode,
     useMargins,
+    fullWidth,
     fullScreenMode,
   ] = useBatchedPublishingSubjects(
     dashboardApi.title$,
@@ -37,6 +39,7 @@ export const DashboardViewport = () => {
     dashboardApi.layout$,
     dashboardApi.viewMode$,
     dashboardApi.settings.useMargins$,
+    dashboardApi.settings.fullWidth$,
     dashboardApi.fullScreenMode$
   );
   const onExit = useCallback(() => {
@@ -59,6 +62,8 @@ export const DashboardViewport = () => {
     'dshDashboardViewport--empty': panelCount === 0 && sectionCount === 0,
     'dshDashboardViewport--print': viewMode === 'print',
     'dshDashboardViewport--panelExpanded': Boolean(expandedPanelId),
+    // a maximized panel and print layouts always use the available width
+    'dshDashboardViewport--fixedWidth': !fullWidth && !expandedPanelId && viewMode !== 'print',
   });
 
   const styles = useMemoCss(dashboardViewportStyles);
@@ -109,6 +114,10 @@ const dashboardViewportStyles = {
   }),
   viewport: {
     width: '100%',
+    '&.dshDashboardViewport--fixedWidth': {
+      maxWidth: DASHBOARD_MAX_WIDTH,
+      marginInline: 'auto',
+    },
     '&.dshDashboardViewport--empty': {
       height: '100%',
     },

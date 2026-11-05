@@ -266,6 +266,29 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
             />
           </EuiFormRow>
 
+          <EuiFormRow
+            helpText={i18n.translate(
+              'dashboard.embeddableApi.showSettings.flyout.form.fullWidthHelpText',
+              {
+                defaultMessage:
+                  'When off, the dashboard stops growing on wide screens and is centered, so charts keep their proportions.',
+              }
+            )}
+          >
+            <EuiSwitch
+              compressed
+              label={i18n.translate(
+                'dashboard.embeddableApi.showSettings.flyout.form.fullWidthSwitchLabel',
+                {
+                  defaultMessage: 'Use full screen width',
+                }
+              )}
+              checked={localSettings.full_width}
+              onChange={(event) => updateDashboardSetting({ full_width: event.target.checked })}
+              data-test-subj="dashboardFullWidthSwitch"
+            />
+          </EuiFormRow>
+
           <EuiFormRow>
             <EuiSwitch
               compressed

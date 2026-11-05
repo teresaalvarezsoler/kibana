@@ -16,7 +16,7 @@ import { css } from '@emotion/react';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { GridLayoutData, GridPanelData } from '@kbn/grid-layout';
-import { GridLayout, splitLayoutIntoColumns } from '@kbn/grid-layout';
+import { GridLayout, mergeColumnLayouts, splitLayoutIntoColumns } from '@kbn/grid-layout';
 import {
   useBatchedPublishingSubjects,
   useStateFromPublishingSubject,
@@ -178,13 +178,30 @@ export const DashboardGrid = () => {
    */
   const isHighDensity =
     highDensity &&
-    viewMode === 'view' &&
+    viewMode !== 'print' &&
     expandedPanelId === undefined &&
     layoutWidth >= HIGH_DENSITY_MIN_WIDTH;
 
   const columnLayouts = useMemo(
     () => (isHighDensity ? splitLayoutIntoColumns(layout, HIGH_DENSITY_COLUMN_COUNT) : undefined),
     [isHighDensity, layout]
+  );
+
+  /**
+   * Columns are read in order, so edits made in one column are saved by stacking the
+   * columns back into a single layout.
+   */
+  const latestColumnLayouts = useRef<GridLayoutData[]>([]);
+  latestColumnLayouts.current = columnLayouts ?? [];
+  const onColumnLayoutChanges = useMemo(
+    () =>
+      (columnLayouts ?? []).map((_, columnIndex) => (newColumnLayout: GridLayoutData) => {
+        const columns = [...latestColumnLayouts.current];
+        columns[columnIndex] = newColumnLayout;
+        latestColumnLayouts.current = columns;
+        onLayoutChange(mergeColumnLayouts(columns));
+      }),
+    [columnLayouts, onLayoutChange]
   );
 
   const memoizedGridLayout = useMemo(() => {
@@ -215,8 +232,8 @@ export const DashboardGrid = () => {
                   gridSettings={gridSettings}
                   useCustomDragHandle={true}
                   renderPanelContents={renderPanelContents}
-                  onLayoutChange={onLayoutChange}
-                  accessMode="VIEW"
+                  onLayoutChange={onColumnLayoutChanges[index]}
+                  accessMode={viewMode === 'edit' ? 'EDIT' : 'VIEW'}
                 />
               </div>
             </React.Fragment>
@@ -241,6 +258,7 @@ export const DashboardGrid = () => {
   }, [
     columnLayouts,
     columnStyles,
+    onColumnLayoutChanges,
     layoutStyles,
     layout,
     useMargins,

@@ -8,7 +8,7 @@
  */
 
 import type { GridLayoutData } from '../types';
-import { splitLayoutIntoColumns } from './split_into_columns';
+import { mergeColumnLayouts, splitLayoutIntoColumns } from './split_into_columns';
 
 const panel = (id: string, row: number, column: number, width: number, height: number) => ({
   id,
@@ -96,5 +96,44 @@ describe('splitLayoutIntoColumns', () => {
     expect(Object.keys(right)).toEqual(['network', 'cpu']);
     expect(right.network).toMatchObject({ row: 0 });
     expect(right.cpu).toMatchObject({ row: 1, isCollapsed: true });
+  });
+
+  describe('mergeColumnLayouts', () => {
+    const layout: GridLayoutData = {
+      intro: panel('intro', 0, 0, 48, 6),
+      trends: {
+        id: 'trends',
+        type: 'section',
+        row: 6,
+        title: 'Trends',
+        isCollapsed: false,
+        panels: { t1: panel('t1', 0, 0, 48, 10), t2: panel('t2', 10, 0, 24, 8) },
+      },
+      errors: {
+        id: 'errors',
+        type: 'section',
+        row: 7,
+        title: 'Errors',
+        isCollapsed: false,
+        panels: { e1: panel('e1', 0, 0, 48, 12) },
+      },
+      footer: panel('footer', 8, 0, 48, 4),
+    };
+
+    it('restores the original layout from its columns', () => {
+      expect(mergeColumnLayouts(splitLayoutIntoColumns(layout, 2))).toEqual(layout);
+    });
+
+    it('keeps edits made inside a column', () => {
+      const [left, right] = splitLayoutIntoColumns(layout, 2);
+      const editedRight = {
+        ...right,
+        footer: { ...right.footer, height: 8 },
+      };
+      const merged = mergeColumnLayouts([left, editedRight]);
+
+      expect(merged.footer).toMatchObject({ height: 8 });
+      expect(Object.keys(merged).sort()).toEqual(Object.keys(layout).sort());
+    });
   });
 });
