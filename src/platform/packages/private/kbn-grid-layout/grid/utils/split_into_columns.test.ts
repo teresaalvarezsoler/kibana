@@ -29,10 +29,26 @@ describe('splitLayoutIntoColumns', () => {
     };
     const [left, right] = splitLayoutIntoColumns(layout, 2);
 
-    expect(Object.keys(left).sort()).toEqual(['a', 'b', 'd']);
-    expect(left.d).toMatchObject({ row: 10 });
-    expect(Object.keys(right)).toEqual(['c']);
+    expect(Object.keys(left).sort()).toEqual(['a', 'b']);
+    expect(Object.keys(right).sort()).toEqual(['c', 'd']);
     expect(right.c).toMatchObject({ row: 0, column: 0, width: 48 });
+    expect(right.d).toMatchObject({ row: 10 });
+  });
+
+  it('reads like a book: the first half stays left, the last blocks move right', () => {
+    const layout: GridLayoutData = {
+      first: panel('first', 0, 0, 48, 5),
+      second: panel('second', 5, 0, 48, 5),
+      third: panel('third', 10, 0, 48, 5),
+      fourth: panel('fourth', 15, 0, 48, 5),
+      fifth: panel('fifth', 20, 0, 48, 5),
+    };
+    const [left, right] = splitLayoutIntoColumns(layout, 2);
+
+    expect(Object.keys(left)).toEqual(['first', 'second', 'third']);
+    expect(Object.keys(right)).toEqual(['fourth', 'fifth']);
+    expect(right.fourth).toMatchObject({ row: 0 });
+    expect(right.fifth).toMatchObject({ row: 5 });
   });
 
   it('keeps panels that span several rows in the same band', () => {

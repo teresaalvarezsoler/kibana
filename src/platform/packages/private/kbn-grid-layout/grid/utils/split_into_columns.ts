@@ -21,11 +21,6 @@ interface LayoutBlock {
   section: MainSection | CollapsibleSection;
 }
 
-interface LayoutColumn {
-  height: number;
-  sections: OrderedLayout;
-}
-
 const getPanelsHeight = (panels: GridPanelData[]): number =>
   panels.reduce((maxRow, { row, height }) => Math.max(maxRow, row + height), 0);
 
@@ -75,26 +70,55 @@ const getLayoutBlocks = (layout: GridLayoutData): LayoutBlock[] =>
   });
 
 /**
- * Distributes a layout over several side-by-side columns for wide screens.
- * Collapsible sections and bands of ungrouped panels are kept whole and keep their
- * relative order; each one goes to the column that is currently the shortest.
+ * Greedily fills columns in order without exceeding `capacity` rows per column.
+ * Returns the index of the first block in each column.
+ */
+const packInOrder = (heights: number[], capacity: number): number[] => {
+  const columnStarts = [0];
+  let columnHeight = 0;
+  heights.forEach((height, index) => {
+    if (columnHeight > 0 && columnHeight + height > capacity) {
+      columnStarts.push(index);
+      columnHeight = 0;
+    }
+    columnHeight += height;
+  });
+  return columnStarts;
+};
+
+/**
+ * Distributes a layout over several side-by-side columns for wide screens, read like the
+ * pages of a book: the first column holds the top of the dashboard and later columns
+ * continue where the previous one ends. Collapsible sections and bands of ungrouped panels
+ * are kept whole; the split points are chosen so the tallest column is as short as possible,
+ * which leaves the earlier columns as full as they can be, so the last blocks move first.
  */
 export const splitLayoutIntoColumns = (
   layout: GridLayoutData,
   columnCount: number
 ): GridLayoutData[] => {
-  const columns: LayoutColumn[] = Array.from({ length: columnCount }, () => ({
-    height: 0,
-    sections: {},
-  }));
+  const blocks = getLayoutBlocks(layout);
+  const heights = blocks.map(({ height }) => height);
 
-  getLayoutBlocks(layout).forEach(({ height, section }) => {
-    const target = columns.reduce((shortest, column) =>
-      column.height < shortest.height ? column : shortest
+  // binary search for the smallest column height that fits all blocks in `columnCount` columns
+  let low = Math.max(0, ...heights);
+  let high = heights.reduce((sum, height) => sum + height, 0);
+  while (low < high) {
+    const capacity = Math.floor((low + high) / 2);
+    if (packInOrder(heights, capacity).length <= columnCount) high = capacity;
+    else low = capacity + 1;
+  }
+  const columnStarts = packInOrder(heights, low);
+
+  return Array.from({ length: columnCount }, (_, columnIndex) => {
+    const columnBlocks = blocks.slice(
+      columnStarts[columnIndex] ?? blocks.length,
+      columnStarts[columnIndex + 1] ?? blocks.length
     );
-    target.sections[section.id] = { ...section, order: Object.keys(target.sections).length };
-    target.height += height;
+    const sections: OrderedLayout = {};
+    columnBlocks.forEach(({ section }, order) => {
+      sections[section.id] = { ...section, order };
+    });
+    return getGridLayout(sections);
   });
-
-  return columns.map(({ sections }) => getGridLayout(sections));
 };
