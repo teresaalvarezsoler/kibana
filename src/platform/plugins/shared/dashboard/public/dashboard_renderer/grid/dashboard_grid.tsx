@@ -138,6 +138,7 @@ export const DashboardGrid = () => {
   );
 
   const styles = useMemoCss(dashboardGridStyles);
+  const columnStyles = useMemoCss(highDensityStyles);
 
   useEffect(() => {
     /**
@@ -196,23 +197,29 @@ export const DashboardGrid = () => {
 
     if (columnLayouts) {
       return (
-        <div css={highDensityStyles.columns} data-test-subj="dshHighDensityLayout">
+        <div css={columnStyles.columns} data-test-subj="dshHighDensityLayout">
           {columnLayouts.map((columnLayout, index) => (
-            <div
-              key={index}
-              css={highDensityStyles.column}
-              style={index > 0 ? { marginLeft: -gridSettings.gutterSize } : undefined}
-            >
-              <GridLayout
-                css={layoutStyles}
-                layout={columnLayout}
-                gridSettings={gridSettings}
-                useCustomDragHandle={true}
-                renderPanelContents={renderPanelContents}
-                onLayoutChange={onLayoutChange}
-                accessMode="VIEW"
-              />
-            </div>
+            <React.Fragment key={index}>
+              {index > 0 && (
+                <div
+                  css={columnStyles.divider}
+                  role="separator"
+                  aria-orientation="vertical"
+                  data-test-subj="dshHighDensityColumnDivider"
+                />
+              )}
+              <div css={columnStyles.column}>
+                <GridLayout
+                  css={layoutStyles}
+                  layout={columnLayout}
+                  gridSettings={gridSettings}
+                  useCustomDragHandle={true}
+                  renderPanelContents={renderPanelContents}
+                  onLayoutChange={onLayoutChange}
+                  accessMode="VIEW"
+                />
+              </div>
+            </React.Fragment>
           ))}
         </div>
       );
@@ -233,6 +240,7 @@ export const DashboardGrid = () => {
     );
   }, [
     columnLayouts,
+    columnStyles,
     layoutStyles,
     layout,
     useMargins,
@@ -284,11 +292,21 @@ const highDensityStyles = {
     display: 'flex',
     alignItems: 'flex-start',
   }),
-  // equal flex bases; later columns overlap the previous column's outer gutter
   column: css({
     flex: '1 1 0',
     minWidth: 0,
   }),
+  // a full-height rule with extra space on both sides, so the columns read as two pages
+  divider: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      alignSelf: 'stretch',
+      flex: '0 0 auto',
+      width: euiTheme.border.width.thick,
+      marginBlock: euiTheme.size.s,
+      marginInline: euiTheme.size.m,
+      borderRadius: euiTheme.border.radius.small,
+      backgroundColor: euiTheme.colors.borderBasePlain,
+    }),
 };
 
 const dashboardGridStyles = {
